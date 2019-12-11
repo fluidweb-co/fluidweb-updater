@@ -1,0 +1,19 @@
+{
+    "name": "fluidweb-updater",
+    "version": "0.1.0",
+    "description": "Auto-updater for custom coded theme and plugins hosted on Bitbucket.",
+    "main": "package.json",
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+      "type": "git"
+    },
+    "author": "Fluidweb.co",
+    "license": "GPL-3.0",
+    "copyright": "Copyright (c) 2019, Fluidweb OÜ",
+    "homepage": "https://fluidweb.co/",
+    "devDependencies": {},
+    "dependencies": {}
+  }
+  
