@@ -19,7 +19,7 @@ class Fluidweb_ThemeUpdater_Bitbucket {
 	/**
 	 * Initialize class
 	 */
-	function __construct( $slug, $repo, $bbUsername, $bbPassword ) {
+	function __construct( $slug, $repo, $bbUsername, $bbPassword, $allowBetaUpdates ) {
 		// Bail if user doesn't have the right permissions
 		if ( ! current_user_can( 'update_themes' ) ) {
 			return;
