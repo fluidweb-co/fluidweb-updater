@@ -100,8 +100,8 @@ class Fluidweb_ThemeUpdater_Bitbucket {
 	 */
 	public function setTransient( $transient ) {    
 		// If we have checked the theme data before, don't re-check
-		if( empty( $transient->checked[ $this->slug ] ) ){
-			return $transient;
+		if ( empty( $transient->checked ) ) {
+    		return $transient;
 		}
 
 		// Get plugin & GitHub release information
@@ -116,7 +116,7 @@ class Fluidweb_ThemeUpdater_Bitbucket {
 		$repo_version = ltrim( $this->bitbucketAPIResult->name, 'v' );
 
 		// Check the versions if we need to do an update
-		$doUpdate = version_compare( $repo_version, $this->themeData->get('Version') );
+		$doUpdate = version_compare( $repo_version, $transient->checked[ $this->slug ] );
 
 		// Update the transient to include our updated plugin data
 		if ( $doUpdate == 1 ) {
@@ -132,7 +132,6 @@ class Fluidweb_ThemeUpdater_Bitbucket {
 				'package' => $package,
 			);
 			$transient->response[ $this->slug ] = $obj;
-			$transient->checked[ $this->slug ] = $repo_version;
 		}
 
 		return $transient;
