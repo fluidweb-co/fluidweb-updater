@@ -114,7 +114,7 @@ class Fluidweb_PluginUpdater_Bitbucket {
 		$repo_version = ltrim( $this->bitbucketAPIResult->name, 'v' );
 		
 		// Check the versions if we need to do an update ( $repo_version > current version )
-		$doUpdate = version_compare( $repo_version, $transient->checked[ $this->slug ] );
+		$doUpdate = version_compare( $repo_version, $this->pluginData["Version"] );
 
 		// Update the transient to include our updated plugin data
 		if ( $doUpdate == 1 ) {
