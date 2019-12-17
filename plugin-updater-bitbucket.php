@@ -103,7 +103,7 @@ class Fluidweb_PluginUpdater_Bitbucket {
 	 */
 	public function setTransient( $transient ) {    
 		// If we have checked the plugin data before, don't re-check
-		if ( empty( $transient->checked ) ) {
+		if ( $_GET['force-check'] !== '1' && empty( $transient->checked ) ) {
     		return $transient;
 		}
 		
