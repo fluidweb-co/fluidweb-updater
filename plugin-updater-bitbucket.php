@@ -102,12 +102,7 @@ class Fluidweb_PluginUpdater_Bitbucket {
 	 * Push in plugin version information to get the update notification
 	 */
 	public function setTransient( $transient ) {    
-		// If we have checked the plugin data before, don't re-check
-		if ( empty( $transient->checked ) && $_GET['force-check'] !== '1' ) {
-    		return $transient;
-		}
-		
-		// Get plugin & GitHub release information
+		// Get plugin & git release information
 		$this->initPluginData();
 		$this->getRepoReleaseInfo();
 		

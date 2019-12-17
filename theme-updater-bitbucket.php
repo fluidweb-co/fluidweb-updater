@@ -99,12 +99,7 @@ class Fluidweb_ThemeUpdater_Bitbucket {
 	 * Push in theme version information to get the update notification
 	 */
 	public function setTransient( $transient ) {    
-		// If we have checked the theme data before, don't re-check
-		if ( empty( $transient->checked ) && $_GET['force-check'] !== '1' ) {
-    		return $transient;
-		}
-
-		// Get plugin & GitHub release information
+		// Get theme & git release information
 		$this->initThemeData();
 		$this->getRepoReleaseInfo();
 
