@@ -100,7 +100,7 @@ class Fluidweb_ThemeUpdater_Bitbucket {
 	 */
 	public function setTransient( $transient ) {    
 		// If we have checked the theme data before, don't re-check
-		if ( $_GET['force-check'] !== '1' && empty( $transient->checked ) ) {
+		if ( empty( $transient->checked ) && $_GET['force-check'] !== '1' ) {
     		return $transient;
 		}
 
