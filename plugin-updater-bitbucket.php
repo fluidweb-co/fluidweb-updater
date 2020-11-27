@@ -56,11 +56,20 @@ if ( ! class_exists( 'Fluidweb_PluginUpdater_Bitbucket' ) ) {
 		 */
 		private function callRepositoryAPI( $url ) {
 			$process = curl_init( $url );
-			curl_setopt( $process, CURLOPT_USERPWD, sprintf( '%s:%s', $this->bitbucketUsername, $this->bitbucketPassword ) );
 			curl_setopt( $process, CURLOPT_RETURNTRANSFER, TRUE );
-			$response = curl_exec( $process );
+			
+			// Maybe add password
+			if ( ! empty( $this->bitbucketUsername ) && ! empty( $this->bitbucketPassword ) ) {
+				curl_setopt( $process, CURLOPT_USERPWD, sprintf( '%s:%s', $this->bitbucketUsername, $this->bitbucketPassword ) );
+			}
+			
+			// Send request
+			if( ! $response = curl_exec( $process ) ) {
+				trigger_error( curl_error( $process ) );
+			}
+
 			curl_close( $process );
-	
+
 			return $response;
 		}
 	

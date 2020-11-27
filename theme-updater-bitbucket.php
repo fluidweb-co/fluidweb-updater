@@ -7,6 +7,7 @@
 if ( ! class_exists( 'Fluidweb_ThemeUpdater_Bitbucket' ) ) {
 	class Fluidweb_ThemeUpdater_Bitbucket {
 		private $slug;
+		private $current_theme_slug;
 		private $themeData;
 		private $repo;
 		private $bitbucketAPIResult;
@@ -29,6 +30,7 @@ if ( ! class_exists( 'Fluidweb_ThemeUpdater_Bitbucket' ) ) {
 			add_filter( 'http_request_args', array($this, 'addAuthRequestArgs'), 10, 2);
 
 			$this->slug = $slug;
+			$this->current_theme_slug = wp_get_theme()->exists() ? wp_get_theme()->stylesheet : null;
 			$this->repo = $repo;
 			$this->bitbucketUsername = $bbUsername;
 			$this->bitbucketPassword = $bbPassword;
@@ -51,9 +53,18 @@ if ( ! class_exists( 'Fluidweb_ThemeUpdater_Bitbucket' ) ) {
 		 */
 		private function callRepositoryAPI( $url ) {
 			$process = curl_init( $url );
-			curl_setopt( $process, CURLOPT_USERPWD, sprintf( '%s:%s', $this->bitbucketUsername, $this->bitbucketPassword ) );
 			curl_setopt( $process, CURLOPT_RETURNTRANSFER, TRUE );
-			$response = curl_exec( $process );
+			
+			// Maybe add password
+			if ( ! empty( $this->bitbucketUsername ) && ! empty( $this->bitbucketPassword ) ) {
+				curl_setopt( $process, CURLOPT_USERPWD, sprintf( '%s:%s', $this->bitbucketUsername, $this->bitbucketPassword ) );
+			}
+			
+			// Send request
+			if( ! $response = curl_exec( $process ) ) {
+				trigger_error( curl_error( $process ) );
+			}
+
 			curl_close( $process );
 
 			return $response;
@@ -155,7 +166,9 @@ if ( ! class_exists( 'Fluidweb_ThemeUpdater_Bitbucket' ) ) {
 		 * Perform additional actions after update completes
 		 */
 		public function updatesComplete( $upgrader, $hook_extra ) {
-			switch_theme( $this->slug );
+			if ( is_a( $upgrader, 'Theme_Upgrader' && ! empty( $this->current_theme_slug ) ) ) {
+				switch_theme( $this->current_theme_slug );
+			}
 		}
 	}
 }
