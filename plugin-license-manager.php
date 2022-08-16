@@ -178,7 +178,7 @@ if ( ! class_exists( 'Fluidweb_PluginLicenseManager' ) ) {
 			$release_info = $this->get_release_info( $force_check );
 
 			// Nothing found.
-			if ( ! $release_info->success || ! isset( $release_info->data ) ) { return $transient; }
+			if ( ! $release_info || ! property_exists( $release_info, 'success' ) || ! $release_info->success || ! isset( $release_info->data ) ) { return $transient; }
 
 			// Check the versions if we need to do an update ( $repo_version > current version )
 			$doUpdate = version_compare( $release_info->data->version, $this->plugin_data["Version"] );
