@@ -1,6 +1,6 @@
 {
     "name": "fluidweb-updater",
-    "version": "0.1.6",
+    "version": "0.1.7",
     "description": "Auto-updater for custom coded theme and plugins hosted on Bitbucket.",
     "main": "package.json",
     "scripts": {
