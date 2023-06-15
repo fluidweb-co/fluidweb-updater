@@ -16,24 +16,28 @@ if ( ! class_exists( 'Fluidweb_PluginLicenseManager' ) ) {
 		private $customer_key;
 		private $customer_secret;
 		private $license_key;
+		private $activate_option;
 
 
 
 		/**
 		 * Construct a new instance of plugin updater
 		 *
-		 * @param		String		$plugin_file			Relative path to plugin file.
-		 * @param		String		$product_id				ID of the product on the license manager website.
-		 * @param		String		$customer_key			License Manager API consumer key.
-		 * @param		String		$customer_secret		License Manager API consumer secret.
+		 * @param		string		$plugin_file			Relative path to plugin file.
+		 * @param		string		$product_id				ID of the product on the license manager website.
+		 * @param		string		$customer_key			License Manager API consumer key.
+		 * @param		string		$customer_secret		License Manager API consumer secret.
+		 * @param		string		$activate_option		License Manager API consumer secret.
+		 * @param		string		$license_key		License key.
 		 */
-		function __construct( $plugin_file, $product_id, $api_url, $customer_key, $customer_secret, $license_key ) {	
+		function __construct( $plugin_file, $product_id, $api_url, $customer_key, $customer_secret, $activate_option, $license_key ) {	
 			// Set variables
 			$this->plugin_file = $plugin_file;
 			$this->product_id = $product_id;
 			$this->api_url = $api_url;
 			$this->customer_key = $customer_key;
 			$this->customer_secret = $customer_secret;
+			$this->activate_option = $activate_option;
 			$this->license_key = $license_key;
 		}
 
@@ -105,6 +109,32 @@ if ( ! class_exists( 'Fluidweb_PluginLicenseManager' ) ) {
 
 
 		/**
+		 * Get the plugin license information from the license manager server.
+		 */
+		public function get_info( $license_key = null ) {
+			// Defaults to the instance license key.
+			if ( ! $license_key ) {
+				$license_key = $this->license_key;
+			}
+	
+			$url = untrailingslashit( $this->api_url ) . '/wp-json/lmfwc/v2/licenses/' . $license_key;
+
+			$response = $this->call_api( $url );
+
+			if ( $response ) {
+				$data = json_decode( $response );
+				return $data;
+			}
+
+			$error_response = new \stdClass();
+			$error_response->code = 'fwplm_rest_connection_error';
+			$error_response->message = sprintf( 'Couldn\'t connect to the license server (%s). Try again later.', $this->api_url );
+			return $error_response;
+		}
+
+
+
+		/**
 		 * Validate the plugin license key against the license manager server.
 		 */
 		public function validate( $license_key = null ) {
@@ -124,7 +154,7 @@ if ( ! class_exists( 'Fluidweb_PluginLicenseManager' ) ) {
 
 			$error_response = new \stdClass();
 			$error_response->code = 'fwplm_rest_connection_error'; 
-			$error_response->message = 'Couldn\'t connect to the license server. Try again later.';
+			$error_response->message = sprintf( 'Couldn\'t connect to the license server (%s). Try again later.', $this->api_url );
 			return $error_response;
 		}
 
@@ -138,6 +168,13 @@ if ( ! class_exists( 'Fluidweb_PluginLicenseManager' ) ) {
 			if ( ! $license_key ) {
 				$license_key = $this->license_key;
 			}
+
+			if ( ! $license_key ) {
+				$error_response = new \stdClass();
+				$error_response->code = 'fwplm_missing_license_key'; 
+				$error_response->message = 'Missing the license key. Please provide a valid license key and try again.';
+				return $error_response;
+			}
 	
 			$url = untrailingslashit( $this->api_url ) . '/wp-json/lmfwc/v2/licenses/activate/' . $license_key;
 	
@@ -146,16 +183,21 @@ if ( ! class_exists( 'Fluidweb_PluginLicenseManager' ) ) {
 			if ( $response ) {
 				$data = json_decode( $response );
 
-				if ( $data->success ) {
-					update_option( 'fcgaa_license_key_activated', 'yes' );
+				if ( $data && isset( $data->success ) && $data->success ) {
+					update_option( $this->activate_option, 'yes' );
+					return $data;
 				}
-
-				return $data;
+				else if ( $data && isset( $data->message ) && $data->message ) {
+					$error_response = new \stdClass();
+					$error_response->code = isset( $data->code ) ? $data->code : 'fwplm_generic_error';
+					$error_response->message = $data->message;
+					return $error_response;
+				}
 			}
 
 			$error_response = new \stdClass();
 			$error_response->code = 'fwplm_rest_connection_error'; 
-			$error_response->message = 'Couldn\'t connect to the license server. Try again later.';
+			$error_response->message = sprintf( 'Couldn\'t connect to the license server (%s). Try again later.', $this->api_url );
 			return $error_response;
 		}
 
@@ -226,7 +268,7 @@ if ( ! class_exists( 'Fluidweb_PluginLicenseManager' ) ) {
 			$release_info = $this->get_release_info();
 
 			// Bail if new plugin info is not available
-			if( ! $release_info->success || ! isset( $release_info->data ) ) { return $res; }
+			if ( ! $release_info || ! property_exists( $release_info, 'success' ) || ! $release_info->success || ! isset( $release_info->data ) ) { return $res; }
 
 			if ( $args->slug == $this->slug ) {
 				$res = new \stdClass();
